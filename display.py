@@ -196,8 +196,8 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
                 target_w, target_h = el.get("width"), el.get("height")
                 png_bytes = cairosvg.svg2png(
                     url=path,
-                    output_width=target_w,
-                    output_height=target_h,
+                    output_width=target_w or canvas_w,
+                    output_height=target_h or canvas_h,
                 )
                 img = Image.open(io.BytesIO(png_bytes)).convert("L")
                 draw._image.paste(img, (el.get("x", 0), el.get("y", 0)))
