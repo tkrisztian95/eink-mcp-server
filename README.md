@@ -104,6 +104,27 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 claude mcp add eink-display /path/to/eink-mcp/venv/bin/python -- /path/to/eink-mcp/server.py
 ```
 
+## Testing
+
+Once added, ask Claude directly in the chat:
+
+**Check the server is connected and get display dimensions:**
+```
+What is the eink display size?
+```
+
+**Draw something:**
+```
+Draw "Hello from Claude" in large text centered on the eink display
+```
+
+**Clear the display:**
+```
+Clear the eink display
+```
+
+Claude will pick up the `get_display_info`, `draw`, and `clear_display` tools automatically. On a Mac without Pi hardware, tool calls still succeed — a `WARNING Hardware not available` line appears in the server's stderr log instead of writing to the display.
+
 ## Configuration
 
 | Environment variable | Default | Description |
