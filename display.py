@@ -2,12 +2,15 @@ import logging
 import os
 from typing import Optional, Union
 
-log = logging.getLogger(__name__)
-
 from PIL import Image, ImageDraw, ImageFont
 
+log = logging.getLogger(__name__)
+
 FONT_PATH = os.getenv("EINK_FONT_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
-FONT_PATH_BOLD = os.getenv("EINK_FONT_PATH_BOLD", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf")
+FONT_PATH_BOLD = os.getenv(
+    "EINK_FONT_PATH_BOLD",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+)
 
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 480
@@ -88,7 +91,9 @@ def _resolve_size(size: Union[int, str]) -> int:
     return size
 
 
-def _load_font(size: Union[int, str], path: Optional[str] = None, bold: bool = False) -> ImageFont.FreeTypeFont:
+def _load_font(
+    size: Union[int, str], path: Optional[str] = None, bold: bool = False
+) -> ImageFont.FreeTypeFont:
     px = _resolve_size(size)
     font_path = path or (FONT_PATH_BOLD if bold else FONT_PATH)
     try:
@@ -97,7 +102,9 @@ def _load_font(size: Union[int, str], path: Optional[str] = None, bold: bool = F
         return ImageFont.load_default()
 
 
-def _text_size(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont) -> tuple[int, int]:
+def _text_size(
+    draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont
+) -> tuple[int, int]:
     bbox = draw.textbbox((0, 0), text, font=font)
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
 
@@ -146,7 +153,9 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
         x, y = el["x"], el["y"]
         w, h = el["width"], el.get("height", 12)
         value = max(0.0, min(1.0, el.get("value", 0.0)))
-        draw.rectangle([x, y, x + w, y + h], outline=el.get("outline", 100), fill=el.get("background", 240))
+        draw.rectangle(
+            [x, y, x + w, y + h], outline=el.get("outline", 100), fill=el.get("background", 240)
+        )
         filled = int(w * value)
         if filled > 0:
             draw.rectangle([x, y, x + filled, y + h], fill=el.get("fill", 0))
@@ -154,7 +163,11 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
     elif t == "divider":
         y = el["y"]
         margin = el.get("margin", 20)
-        draw.line([(margin, y), (canvas_w - margin, y)], fill=el.get("fill", 0), width=el.get("width", 1))
+        draw.line(
+            [(margin, y), (canvas_w - margin, y)],
+            fill=el.get("fill", 0),
+            width=el.get("width", 1),
+        )
 
     elif t == "image":
         try:

@@ -124,9 +124,7 @@ def _text_row(draw: ImageDraw.ImageDraw, s: dict, pad: int, y: int, w: int) -> i
     return y + _text_size(draw, ref, font)[1] + _GAP
 
 
-def _bar_chart(
-    draw: ImageDraw.ImageDraw, s: dict, pad: int, y: int, w: int, canvas_h: int
-) -> None:
+def _bar_chart(draw: ImageDraw.ImageDraw, s: dict, pad: int, y: int, w: int, canvas_h: int) -> None:
     font_lbl = _load_font("tiny")
     data = s.get("data", [])
     title = s.get("title", "")

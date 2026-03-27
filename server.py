@@ -5,7 +5,7 @@ from typing import Annotated, Literal, Optional, Union
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
-from display import EinkDisplay, NAMED_SIZES
+from display import NAMED_SIZES, EinkDisplay
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -223,7 +223,8 @@ def draw(
 
     Element types and their fields:
 
-    text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left", max_width=null }
+    text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left",
+                    max_width=null }
     rect:         { type, x0, y0, x1, y1, outline=0, fill=null }
     line:         { type, x0, y0, x1, y1, fill=0, width=1 }
     ellipse:      { type, x0, y0, x1, y1, outline=0, fill=null }
@@ -231,7 +232,8 @@ def draw(
     divider:      { type, y, fill=0, width=1, margin=20 }
     image:        { type, path, x=0, y=0, width=null, height=null }
 
-    size accepts integers or named strings: title(34) large(28) label(19) value(17) small(14) tiny(12).
+    size accepts integers or named strings: title(34) large(28) label(19) value(17) small(14)
+    tiny(12).
     align: "left"|"center"|"right" — use max_width to set the alignment box width.
     progress_bar value: 0.0–1.0 fill fraction.
     fill/outline/background: 0=black, 255=white, 0–255 greyscale.
