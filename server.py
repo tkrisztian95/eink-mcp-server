@@ -102,3 +102,10 @@ def draw(
     raw = [el.model_dump() for el in elements]
     _display.render(raw, rotation=rotation, background=background)
     return f"Rendered {len(elements)} element(s)."
+
+
+if __name__ == "__main__":
+    try:
+        mcp.run(transport="stdio")
+    except Exception:
+        log.exception("Server crashed")
