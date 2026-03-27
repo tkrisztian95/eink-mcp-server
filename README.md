@@ -163,6 +163,14 @@ sudo raspi-config nonint do_spi 0
 sudo reboot
 ```
 
+## Prompts
+
+Ready-made prompts for common drawings. Copy the prompt, fill in any placeholders, and paste it into Claude.
+
+| Prompt | Description | Preview |
+|--------|-------------|---------|
+| [GitHub Profile](prompts/github-profile-eink.md) | Renders a GitHub user's profile card with stats and 7-day activity chart | ![GitHub profile card on e-ink display](assets/prompt-github-profile.png) |
+
 ## Tools
 
 | Tool | Description |
