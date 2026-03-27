@@ -221,8 +221,21 @@ def draw(
 ) -> str:
     """Render drawing elements onto the eink display.
 
+    TOOL SELECTION GUIDE — choose the right approach before calling:
+    • Artistic / scenic content (landscapes, illustrations, portraits, animals,
+      nature scenes, abstract art): generate the image externally and display it
+      via an `image` element. Do NOT attempt to approximate art with primitives.
+    • Structured / geometric content (charts, diagrams, icons, UI widgets,
+      technical drawings): use the primitive elements (rect, line, ellipse, text).
+    • Mixed content: combine an `image` element as background with text/rect
+      overlays on top.
+
     Element types and their fields:
 
+    image:        { type, path, x=0, y=0, width=null, height=null }
+                  — PREFERRED for any pictorial or artistic content.
+                    path must be an absolute path to a PNG/JPEG/Pillow-readable file.
+                    width/height are optional; omit both to use the file's native size.
     text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left",
                     max_width=null }
     rect:         { type, x0, y0, x1, y1, outline=0, fill=null }
@@ -230,7 +243,6 @@ def draw(
     ellipse:      { type, x0, y0, x1, y1, outline=0, fill=null }
     progress_bar: { type, x, y, width, height=12, value, fill=0, background=240, outline=100 }
     divider:      { type, y, fill=0, width=1, margin=20 }
-    image:        { type, path, x=0, y=0, width=null, height=null }
 
     size accepts integers or named strings: title(34) large(28) label(19) value(17) small(14)
     tiny(12).
@@ -254,6 +266,14 @@ def render_layout(
 ) -> str:
     """Render a structured dashboard layout onto the eink display.
 
+    TOOL SELECTION GUIDE:
+    • Use render_layout for dashboard-style output: stats, text lists, charts,
+      timelines, activity summaries. Sections auto-stack — no coordinate math.
+    • Use draw() instead when you need pixel-precise positioning, layered elements,
+      or a full-canvas artistic image (via its `image` element type).
+    • For pictorial/scenic content inside a layout (e.g. a photo with a caption),
+      use an `image_block` section — supply a pre-existing image file path.
+
     Sections stack vertically — no x/y coordinate math required.
 
     Section types:
@@ -265,6 +285,8 @@ def render_layout(
     spacer:      { type, height=10 }
     bar_chart:   { type, data=[{label, value},...], title=null }
     image_block: { type, path, width=null }
+                 — use for pictorial/scenic content; path must be an absolute
+                   path to a PNG/JPEG/Pillow-readable file.
 
     bar_chart must be the last section — it fills all remaining vertical space.
     progress: 0.0–1.0 fill fraction.
