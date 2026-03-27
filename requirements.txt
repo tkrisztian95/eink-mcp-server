@@ -1,0 +1,6 @@
+mcp[cli]
+Pillow
+spidev
+RPi.GPIO
+gpiozero
+lgpio
