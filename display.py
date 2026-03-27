@@ -196,10 +196,15 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
                 target_w, target_h = el.get("width"), el.get("height")
                 png_bytes = cairosvg.svg2png(
                     url=path,
-                    output_width=target_w or canvas_w,
-                    output_height=target_h or canvas_h,
+                    output_width=target_w,
+                    output_height=target_h,
                 )
                 img = Image.open(io.BytesIO(png_bytes)).convert("L")
+                if not target_w and not target_h:
+                    orig_w, orig_h = img.size
+                    if orig_w > canvas_w or orig_h > canvas_h:
+                        ratio = min(canvas_w / orig_w, canvas_h / orig_h)
+                        img = img.resize((int(orig_w * ratio), int(orig_h * ratio)), Image.LANCZOS)
                 draw._image.paste(img, (el.get("x", 0), el.get("y", 0)))
                 return
             img = Image.open(path).convert("L")
