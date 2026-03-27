@@ -169,7 +169,7 @@ Ready-made prompts for common drawings. Copy the prompt, fill in any placeholder
 
 | Prompt | Description | Preview |
 |--------|-------------|---------|
-| [GitHub Profile](prompts/github-profile-eink.md) | Renders a GitHub user's profile card with stats and 7-day activity chart | ![GitHub profile card on e-ink display](assets/prompt-github-profile.png) |
+| [GitHub Profile](prompts/github-profile-eink.md) | Renders a GitHub user's profile card with stats and 7-day activity chart | ![GitHub profile card on e-ink display](assets/prompt-github-profile.jpg) |
 
 ## Tools
 
