@@ -1,15 +1,26 @@
 import logging
 import os
-from typing import Optional
+from typing import Optional, Union
 
 log = logging.getLogger(__name__)
 
 from PIL import Image, ImageDraw, ImageFont
 
 FONT_PATH = os.getenv("EINK_FONT_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
+FONT_PATH_BOLD = os.getenv("EINK_FONT_PATH_BOLD", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf")
 
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 480
+
+# Named font sizes — match the eink-claude-usage conventions
+NAMED_SIZES: dict[str, int] = {
+    "title": 34,
+    "large": 28,
+    "label": 19,
+    "value": 17,
+    "small": 14,
+    "tiny": 12,
+}
 
 
 class EinkDisplay:
@@ -50,7 +61,7 @@ class EinkDisplay:
         draw = ImageDraw.Draw(image)
 
         for el in elements:
-            _draw_element(draw, el)
+            _draw_element(draw, el, w, h)
 
         if rotation != 0:
             image = image.rotate(rotation, expand=True)
@@ -65,26 +76,50 @@ class EinkDisplay:
         epd.sleep()
 
 
-def _load_font(size: int, path: Optional[str] = None) -> ImageFont.FreeTypeFont:
+def _resolve_size(size: Union[int, str]) -> int:
+    if isinstance(size, str):
+        return NAMED_SIZES.get(size, 24)
+    return size
+
+
+def _load_font(size: Union[int, str], path: Optional[str] = None, bold: bool = False) -> ImageFont.FreeTypeFont:
+    px = _resolve_size(size)
+    font_path = path or (FONT_PATH_BOLD if bold else FONT_PATH)
     try:
-        return ImageFont.truetype(path or FONT_PATH, size)
+        return ImageFont.truetype(font_path, px)
     except Exception:
         return ImageFont.load_default()
 
 
-def _draw_element(draw: ImageDraw.ImageDraw, el: dict) -> None:
+def _text_size(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont) -> tuple[int, int]:
+    bbox = draw.textbbox((0, 0), text, font=font)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: int) -> None:
     t = el.get("type")
 
     if t == "text":
-        font = _load_font(el.get("size", 24), el.get("font"))
-        draw.text((el["x"], el["y"]), el["text"], font=font, fill=el.get("fill", 0))
+        font = _load_font(el.get("size", 24), el.get("font"), el.get("bold", False))
+        text = el["text"]
+        x, y = el["x"], el["y"]
+        align = el.get("align", "left")
+
+        if align in ("center", "right"):
+            max_width = el.get("max_width", canvas_w)
+            tw, _ = _text_size(draw, text, font)
+            if align == "center":
+                x = x + (max_width - tw) // 2
+            else:
+                x = x + max_width - tw
+
+        draw.text((x, y), text, font=font, fill=el.get("fill", 0))
 
     elif t == "rect":
-        fill: Optional[int] = el.get("fill")
         draw.rectangle(
             [el["x0"], el["y0"], el["x1"], el["y1"]],
             outline=el.get("outline", 0),
-            fill=fill,
+            fill=el.get("fill"),
         )
 
     elif t == "line":
@@ -95,9 +130,38 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict) -> None:
         )
 
     elif t == "ellipse":
-        fill = el.get("fill")
         draw.ellipse(
             [el["x0"], el["y0"], el["x1"], el["y1"]],
             outline=el.get("outline", 0),
-            fill=fill,
+            fill=el.get("fill"),
         )
+
+    elif t == "progress_bar":
+        x, y = el["x"], el["y"]
+        w, h = el["width"], el.get("height", 12)
+        value = max(0.0, min(1.0, el.get("value", 0.0)))
+        draw.rectangle([x, y, x + w, y + h], outline=el.get("outline", 100), fill=el.get("background", 240))
+        filled = int(w * value)
+        if filled > 0:
+            draw.rectangle([x, y, x + filled, y + h], fill=el.get("fill", 0))
+
+    elif t == "divider":
+        y = el["y"]
+        margin = el.get("margin", 20)
+        draw.line([(margin, y), (canvas_w - margin, y)], fill=el.get("fill", 0), width=el.get("width", 1))
+
+    elif t == "image":
+        try:
+            img = Image.open(el["path"]).convert("L")
+            target_w, target_h = el.get("width"), el.get("height")
+            if target_w or target_h:
+                orig_w, orig_h = img.size
+                if target_w and target_h:
+                    img = img.resize((target_w, target_h), Image.LANCZOS)
+                elif target_w:
+                    img = img.resize((target_w, int(orig_h * target_w / orig_w)), Image.LANCZOS)
+                else:
+                    img = img.resize((int(orig_w * target_h / orig_h), target_h), Image.LANCZOS)
+            draw._image.paste(img, (el.get("x", 0), el.get("y", 0)))
+        except Exception as e:
+            log.warning("image element failed: %s", e)

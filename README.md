@@ -10,7 +10,7 @@ An MCP server that lets AI agents draw on or clear a Waveshare 7.5" V2 e-ink dis
 
 | Tool | Description |
 |------|-------------|
-| `get_display_info` | Returns display width and height in pixels |
+| `get_display_info` | Returns display dimensions and named font sizes |
 | `clear_display` | Clears the display to white |
 | `draw` | Renders a list of drawing elements onto the display |
 
@@ -20,9 +20,13 @@ All elements are passed as a list to `draw`. Each must have a `type` field.
 
 **text**
 ```json
-{ "type": "text", "text": "Hello", "x": 10, "y": 10, "size": 24, "fill": 0, "font": null }
+{ "type": "text", "text": "Hello", "x": 10, "y": 10, "size": "label", "bold": false, "fill": 0, "align": "left", "max_width": null, "font": null }
 ```
-- `font` — optional path to a `.ttf` file; defaults to DejaVuSansMono
+- `size` — pixel integer or named size: `title`(34) `large`(28) `label`(19) `value`(17) `small`(14) `tiny`(12)
+- `bold` — uses the bold variant of the default font
+- `align` — `"left"` (default), `"center"`, or `"right"`; positions text within `[x, x+max_width]`
+- `max_width` — alignment box width; defaults to full canvas width
+- `font` — optional path to a custom `.ttf` file
 
 **rect**
 ```json
@@ -38,6 +42,24 @@ All elements are passed as a list to `draw`. Each must have a `type` field.
 ```json
 { "type": "ellipse", "x0": 100, "y0": 100, "x1": 300, "y1": 300, "outline": 0, "fill": null }
 ```
+
+**progress_bar**
+```json
+{ "type": "progress_bar", "x": 20, "y": 100, "width": 760, "height": 12, "value": 0.65, "fill": 0, "background": 240, "outline": 100 }
+```
+- `value` — fill fraction, `0.0`–`1.0`
+
+**divider**
+```json
+{ "type": "divider", "y": 150, "fill": 0, "width": 1, "margin": 20 }
+```
+- Draws a full-width horizontal line with a left/right margin
+
+**image**
+```json
+{ "type": "image", "path": "/path/to/file.png", "x": 0, "y": 0, "width": null, "height": null }
+```
+- `width`/`height` — scale the image; if only one is set, aspect ratio is preserved
 
 Colour values: `0` = black, `255` = white, any integer 0–255 for greyscale.
 
