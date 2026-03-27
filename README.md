@@ -2,6 +2,10 @@
 
 An MCP server that lets AI agents draw on or clear a Waveshare 7.5" V2 e-ink display (800×480).
 
+## Screenshot
+
+![Claude terminal using the eink-display MCP tools](assets/screenshot.png)
+
 ## Tools
 
 | Tool | Description |
