@@ -56,8 +56,8 @@ def _header(draw: ImageDraw.ImageDraw, s: dict, pad: int, y: int, w: int) -> int
 def _divider(draw: ImageDraw.ImageDraw, s: dict, pad: int, y: int, w: int) -> int:
     light = s.get("light", False)
     bold = s.get("bold", False)
-    fill = s.get("fill", 160 if light else 0)
-    lw = s.get("line_width", 2 if bold else 1)
+    fill = s["fill"] if s.get("fill") is not None else (160 if light else 0)
+    lw = s["line_width"] if s.get("line_width") is not None else (2 if bold else 1)
     before = s.get("margin_before", 4)
     after = s.get("margin_after", 6)
 
