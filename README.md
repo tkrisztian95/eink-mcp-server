@@ -12,9 +12,52 @@ An MCP server that lets AI agents draw on or clear a Waveshare 7.5" V2 e-ink dis
 |------|-------------|
 | `get_display_info` | Returns display dimensions and named font sizes |
 | `clear_display` | Clears the display to white |
-| `draw` | Renders a list of drawing elements onto the display |
+| `render_layout` | Renders a structured dashboard — sections stack vertically, no coordinates needed |
+| `draw` | Renders a list of raw drawing elements — full pixel-level control |
 
-### Drawing elements
+### render_layout — sections
+
+Sections stack top-to-bottom automatically. Pass them in display order.
+
+**header**
+```json
+{ "type": "header", "title": "My Dashboard", "subtitle": "10:15" }
+```
+
+**divider**
+```json
+{ "type": "divider", "light": false, "bold": false }
+```
+- `light` — grey rule; `bold` — thicker rule
+
+**stat_block**
+```json
+{ "type": "stat_block", "label": "Today", "value": "1.2K tok", "progress": 0.45, "detail": "987 in / 247 out", "badge": "Resets 13h" }
+```
+- `progress` — 0.0–1.0; omit to hide the bar
+- `badge` — small label to the right of the bar
+
+**text_row**
+```json
+{ "type": "text_row", "left": "Status: OK", "right": "v1.2", "size": "small" }
+```
+
+**spacer**
+```json
+{ "type": "spacer", "height": 10 }
+```
+
+**bar_chart** *(must be last — fills remaining space)*
+```json
+{ "type": "bar_chart", "title": "7-day tokens", "data": [{"label": "Mon", "value": 48300}, {"label": "Tue", "value": 72100}] }
+```
+
+**image_block**
+```json
+{ "type": "image_block", "path": "/path/to/file.png", "width": 400 }
+```
+
+### draw — drawing elements
 
 All elements are passed as a list to `draw`. Each must have a `type` field.
 

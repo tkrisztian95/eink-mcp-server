@@ -111,6 +111,88 @@ DrawElement = Annotated[
 ]
 
 
+# ── Layout section models ─────────────────────────────────────────────────────
+
+
+class HeaderSection(BaseModel):
+    type: Literal["header"]
+    title: str
+    subtitle: Optional[str] = None
+    """Optional right-aligned subtitle (e.g. timestamp)."""
+
+
+class DividerSection(BaseModel):
+    type: Literal["divider"]
+    light: bool = False
+    """Light grey rule (fill=160). Default is solid black."""
+    bold: bool = False
+    """Thicker rule (width=2). Takes precedence over light."""
+    fill: Optional[int] = None
+    line_width: Optional[int] = None
+    margin_before: int = 4
+    margin_after: int = 6
+
+
+class StatBlockSection(BaseModel):
+    type: Literal["stat_block"]
+    label: str
+    value: Optional[str] = None
+    """Right-aligned summary value (e.g. '1.2K tok')."""
+    progress: Optional[float] = None
+    """Fill fraction 0.0–1.0. Omit to hide the progress bar."""
+    detail: Optional[str] = None
+    """Small sub-line below the bar (e.g. '987 in / 247 out')."""
+    badge: Optional[str] = None
+    """Small label to the right of the bar (e.g. 'Resets 13h')."""
+
+
+class TextRowSection(BaseModel):
+    type: Literal["text_row"]
+    left: Optional[str] = None
+    right: Optional[str] = None
+    size: Union[int, str] = "value"
+    bold: bool = False
+    fill: int = 0
+
+
+class SpacerSection(BaseModel):
+    type: Literal["spacer"]
+    height: int = 10
+
+
+class BarDataPoint(BaseModel):
+    label: str
+    value: float
+
+
+class BarChartSection(BaseModel):
+    type: Literal["bar_chart"]
+    data: list[BarDataPoint]
+    title: Optional[str] = None
+    """Must be the last section — fills all remaining vertical space."""
+
+
+class ImageBlockSection(BaseModel):
+    type: Literal["image_block"]
+    path: str
+    width: Optional[int] = None
+    """Scale to this width, preserving aspect ratio. Defaults to full content width."""
+
+
+LayoutSection = Annotated[
+    Union[
+        HeaderSection,
+        DividerSection,
+        StatBlockSection,
+        TextRowSection,
+        SpacerSection,
+        BarChartSection,
+        ImageBlockSection,
+    ],
+    Field(discriminator="type"),
+]
+
+
 # ── Tools ─────────────────────────────────────────────────────────────────────
 
 
@@ -159,6 +241,54 @@ def draw(
     raw = [el.model_dump() for el in elements]
     _display.render(raw, rotation=rotation, background=background)
     return f"Rendered {len(elements)} element(s)."
+
+
+@mcp.tool()
+def render_layout(
+    sections: list[LayoutSection],
+    padding: int = 20,
+    rotation: int = 0,
+    background: int = 255,
+) -> str:
+    """Render a structured dashboard layout onto the eink display.
+
+    Sections stack vertically — no x/y coordinate math required.
+
+    Section types:
+
+    header:      { type, title, subtitle=null }
+    divider:     { type, light=false, bold=false, margin_before=4, margin_after=6 }
+    stat_block:  { type, label, value=null, progress=null, detail=null, badge=null }
+    text_row:    { type, left=null, right=null, size="value", bold=false, fill=0 }
+    spacer:      { type, height=10 }
+    bar_chart:   { type, data=[{label, value},...], title=null }
+    image_block: { type, path, width=null }
+
+    bar_chart must be the last section — it fills all remaining vertical space.
+    progress: 0.0–1.0 fill fraction.
+    size: integer pixels or named — title(34) large(28) label(19) value(17) small(14) tiny(12).
+    """
+    from PIL import Image
+
+    from layout import render_layout as _render_layout
+
+    if rotation in (90, 270):
+        w, h = _display.height, _display.width
+    else:
+        w, h = _display.width, _display.height
+
+    image = Image.new("L", (w, h), background)
+    _render_layout(image, [s.model_dump() for s in sections], padding)
+
+    if rotation != 0:
+        image = image.rotate(rotation, expand=True)
+
+    if not _display._available:
+        log.warning("Hardware not available — layout rendered (dry run)")
+        return f"Layout rendered (dry run): {len(sections)} section(s)."
+
+    _display.send(image)
+    return f"Layout rendered: {len(sections)} section(s)."
 
 
 if __name__ == "__main__":

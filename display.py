@@ -51,6 +51,16 @@ class EinkDisplay:
         epd.Clear()
         epd.sleep()
 
+    def send(self, image: Image.Image) -> None:
+        """Send a fully prepared PIL image to the hardware."""
+        if not self._available:
+            log.warning("Hardware not available — skipping send")
+            return
+        epd = self._epd_module.EPD()
+        epd.init()
+        epd.display(epd.getbuffer(image.convert("1")))
+        epd.sleep()
+
     def render(self, elements: list[dict], rotation: int = 0, background: int = 255) -> None:
         if rotation in (90, 270):
             w, h = self.height, self.width
@@ -69,11 +79,7 @@ class EinkDisplay:
         if not self._available:
             log.warning("Hardware not available — rendered %d elements (dry run)", len(elements))
             return
-
-        epd = self._epd_module.EPD()
-        epd.init()
-        epd.display(epd.getbuffer(image.convert("1")))
-        epd.sleep()
+        self.send(image)
 
 
 def _resolve_size(size: Union[int, str]) -> int:
