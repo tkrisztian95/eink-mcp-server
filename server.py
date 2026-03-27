@@ -1,3 +1,5 @@
+import logging
+import sys
 from typing import Annotated, Literal, Optional, Union
 
 from mcp.server.fastmcp import FastMCP
@@ -5,8 +7,12 @@ from pydantic import BaseModel, Field
 
 from display import EinkDisplay
 
+logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="%(levelname)s %(message)s")
+log = logging.getLogger(__name__)
+
 mcp = FastMCP("eink-display")
 _display = EinkDisplay()
+log.info("eink-display MCP server started (display available: %s)", _display._available)
 
 
 # ── Drawing element models ────────────────────────────────────────────────────

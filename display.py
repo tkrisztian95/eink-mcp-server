@@ -1,5 +1,8 @@
+import logging
 import os
 from typing import Optional
+
+log = logging.getLogger(__name__)
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -30,7 +33,7 @@ class EinkDisplay:
 
     def clear(self) -> None:
         if not self._available:
-            print("[eink] Hardware not available — skipping clear")
+            log.warning("Hardware not available — skipping clear")
             return
         epd = self._epd_module.EPD()
         epd.init()
@@ -53,7 +56,7 @@ class EinkDisplay:
             image = image.rotate(rotation, expand=True)
 
         if not self._available:
-            print(f"[eink] Hardware not available — rendered {len(elements)} elements (dry run)")
+            log.warning("Hardware not available — rendered %d elements (dry run)", len(elements))
             return
 
         epd = self._epd_module.EPD()
