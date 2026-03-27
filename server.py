@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from typing import Annotated, Literal, Optional, Union
 
@@ -12,6 +13,7 @@ log = logging.getLogger(__name__)
 
 mcp = FastMCP("eink-display")
 _display = EinkDisplay()
+_default_rotation = int(os.environ.get("EINK_ROTATION", 0))
 log.info("eink-display MCP server started (display available: %s)", _display._available)
 
 
@@ -216,7 +218,7 @@ def clear_display() -> str:
 @mcp.tool()
 def draw(
     elements: list[DrawElement],
-    rotation: int = 0,
+    rotation: int = _default_rotation,
     background: int = 255,
 ) -> str:
     """Render drawing elements onto the eink display.
@@ -262,7 +264,7 @@ def draw(
 def render_layout(
     sections: list[LayoutSection],
     padding: int = 20,
-    rotation: int = 0,
+    rotation: int = _default_rotation,
     background: int = 255,
 ) -> str:
     """Render a structured dashboard layout onto the eink display.

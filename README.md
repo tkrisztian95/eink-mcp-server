@@ -64,6 +64,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "args": ["/path/to/eink-mcp/server.py"],
       "env": {
         "EINK_DISPLAY_MODEL": "epd7in5_V2",
+        "EINK_ROTATION": "0",
         "EINK_FONT_PATH": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
         "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
       }
@@ -89,8 +90,10 @@ claude login
 **Register the MCP server:**
 
 ```bash
-claude mcp add eink-display /path/to/eink-mcp/venv/bin/python -- /path/to/eink-mcp/server.py
+claude mcp add eink-display -e EINK_DISPLAY_MODEL=<your_model> -e EINK_ROTATION=0 /path/to/eink-mcp/venv/bin/python -- /path/to/eink-mcp/server.py
 ```
+
+Adjust `EINK_DISPLAY_MODEL` and `EINK_ROTATION` to match your hardware. See the [Configuration](#configuration) section for supported values.
 
 **Verify the server is listed:**
 
@@ -124,6 +127,7 @@ Claude will pick up the `get_display_info`, `draw`, and `clear_display` tools au
 | Environment variable | Default | Description |
 |----------------------|---------|-------------|
 | `EINK_DISPLAY_MODEL` | `epd7in5_V2` | Waveshare display model name — drives both hardware driver and canvas dimensions. Built-in models: `epd7in5_V2` (800×480), `epd7in5_V3` (800×480), `epd7in5` (640×384), `epd5in83_V2` (648×480), `epd4in2` / `epd4in2_V2` (400×300), `epd2in13_V4` (122×250), `epd2in7` (176×264), `epd1in54_V2` (200×200). Unknown values fall back to 800×480. |
+| `EINK_ROTATION` | `0` | Default rotation applied to every `draw` and `render_layout` call. Accepted values: `0`, `90`, `180`, `270`. Useful when the display is mounted sideways or upside-down. |
 | `EINK_FONT_PATH` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf` | Default font for text elements |
 | `EINK_FONT_PATH_BOLD` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf` | Bold font for text elements |
 
