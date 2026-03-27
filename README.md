@@ -161,7 +161,12 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "eink-display": {
       "command": "/path/to/eink-mcp/venv/bin/python",
-      "args": ["/path/to/eink-mcp/server.py"]
+      "args": ["/path/to/eink-mcp/server.py"],
+      "env": {
+        "EINK_DISPLAY_MODEL": "epd7in5_V2",
+        "EINK_FONT_PATH": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+        "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+      }
     }
   }
 }
@@ -169,8 +174,28 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ### Claude Code
 
+**Install Claude Code on the Pi:**
+
+```bash
+curl -fsSL https://claude.ai/install.sh | sh
+```
+
+**Log in:**
+
+```bash
+claude login
+```
+
+**Register the MCP server:**
+
 ```bash
 claude mcp add eink-display /path/to/eink-mcp/venv/bin/python -- /path/to/eink-mcp/server.py
+```
+
+**Verify the server is listed:**
+
+```bash
+claude mcp list
 ```
 
 ## Testing
