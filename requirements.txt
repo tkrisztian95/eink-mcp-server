@@ -1,5 +1,6 @@
 mcp[cli]
 Pillow
+cairosvg
 spidev
 RPi.GPIO
 gpiozero

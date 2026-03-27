@@ -89,7 +89,7 @@ class DividerElement(BaseModel):
 class ImageElement(BaseModel):
     type: Literal["image"]
     path: str
-    """Absolute path to a PNG, JPEG, or other Pillow-readable image file."""
+    """Absolute path to a PNG, JPEG, SVG, or other Pillow-readable image file."""
     x: int = 0
     y: int = 0
     width: Optional[int] = None
@@ -234,7 +234,8 @@ def draw(
 
     image:        { type, path, x=0, y=0, width=null, height=null }
                   — PREFERRED for any pictorial or artistic content.
-                    path must be an absolute path to a PNG/JPEG/Pillow-readable file.
+                    path must be an absolute path to a PNG/JPEG/SVG/Pillow-readable file.
+                    SVG files are rasterised automatically via cairosvg.
                     width/height are optional; omit both to use the file's native size.
     text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left",
                     max_width=null }

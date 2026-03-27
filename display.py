@@ -1,4 +1,5 @@
 import importlib
+import io
 import logging
 import os
 from typing import Optional, Union
@@ -188,7 +189,20 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
 
     elif t == "image":
         try:
-            img = Image.open(el["path"]).convert("L")
+            path = el["path"]
+            if path.lower().endswith(".svg"):
+                import cairosvg
+
+                target_w, target_h = el.get("width"), el.get("height")
+                png_bytes = cairosvg.svg2png(
+                    url=path,
+                    output_width=target_w,
+                    output_height=target_h,
+                )
+                img = Image.open(io.BytesIO(png_bytes)).convert("L")
+                draw._image.paste(img, (el.get("x", 0), el.get("y", 0)))
+                return
+            img = Image.open(path).convert("L")
             target_w, target_h = el.get("width"), el.get("height")
             if target_w or target_h:
                 orig_w, orig_h = img.size
