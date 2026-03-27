@@ -1,3 +1,4 @@
+import importlib
 import logging
 import os
 from typing import Optional, Union
@@ -12,8 +13,26 @@ FONT_PATH_BOLD = os.getenv(
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
 )
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 480
+# Registry of known Waveshare display models → (width, height).
+# Add entries here when new models are needed.
+DISPLAY_MODELS: dict[str, tuple[int, int]] = {
+    "epd7in5_V2": (800, 480),
+    "epd7in5_V3": (800, 480),
+    "epd7in5": (640, 384),
+    "epd5in83_V2": (648, 480),
+    "epd4in2": (400, 300),
+    "epd4in2_V2": (400, 300),
+    "epd2in13_V4": (122, 250),
+    "epd2in7": (176, 264),
+    "epd1in54_V2": (200, 200),
+}
+
+DISPLAY_MODEL = os.getenv("EINK_DISPLAY_MODEL", "epd7in5_V2")
+_dims = DISPLAY_MODELS.get(DISPLAY_MODEL)
+if _dims is None:
+    log.warning("Unknown EINK_DISPLAY_MODEL %r — falling back to 800×480", DISPLAY_MODEL)
+    _dims = (800, 480)
+DISPLAY_WIDTH, DISPLAY_HEIGHT = _dims
 
 # Named font sizes — match the eink-claude-usage conventions
 NAMED_SIZES: dict[str, int] = {
@@ -29,9 +48,7 @@ NAMED_SIZES: dict[str, int] = {
 class EinkDisplay:
     def __init__(self):
         try:
-            from waveshare_epd import epd7in5_V2
-
-            self._epd_module = epd7in5_V2
+            self._epd_module = importlib.import_module(f"waveshare_epd.{DISPLAY_MODEL}")
             self._available = True
         except Exception:
             self._epd_module = None

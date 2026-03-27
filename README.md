@@ -1,6 +1,6 @@
 # eink-mcp
 
-An MCP server that lets AI agents draw on or clear a Waveshare 7.5" V2 e-ink display (800×480).
+An MCP server that lets AI agents draw on or clear a Waveshare e-ink display.
 
 ## Screenshot
 
@@ -109,7 +109,7 @@ Colour values: `0` = black, `255` = white, any integer 0–255 for greyscale.
 ## Hardware
 
 - Raspberry Pi (any model with GPIO)
-- [Waveshare 7.5inch e-Paper HAT V2](https://www.waveshare.com/7.5inch-e-paper-hat.htm) (800×480)
+- Any supported Waveshare e-Paper display (default: 7.5" V2, 800×480)
 
 ## Setup
 
@@ -198,7 +198,25 @@ Claude will pick up the `get_display_info`, `draw`, and `clear_display` tools au
 
 | Environment variable | Default | Description |
 |----------------------|---------|-------------|
+| `EINK_DISPLAY_MODEL` | `epd7in5_V2` | Waveshare display model name — drives both hardware driver and canvas dimensions. Built-in models: `epd7in5_V2` (800×480), `epd7in5_V3` (800×480), `epd7in5` (640×384), `epd5in83_V2` (648×480), `epd4in2` / `epd4in2_V2` (400×300), `epd2in13_V4` (122×250), `epd2in7` (176×264), `epd1in54_V2` (200×200). Unknown values fall back to 800×480. |
 | `EINK_FONT_PATH` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf` | Default font for text elements |
+| `EINK_FONT_PATH_BOLD` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf` | Bold font for text elements |
+
+To set `EINK_DISPLAY_MODEL` for Claude Desktop, add an `env` block to your config:
+
+```json
+{
+  "mcpServers": {
+    "eink-display": {
+      "command": "/path/to/eink-mcp/venv/bin/python",
+      "args": ["/path/to/eink-mcp/server.py"],
+      "env": {
+        "EINK_DISPLAY_MODEL": "epd7in5_V2"
+      }
+    }
+  }
+}
+```
 
 ## Development
 
