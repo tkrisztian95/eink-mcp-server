@@ -256,7 +256,7 @@ def draw(
     raw = [el.model_dump() for el in elements]
     r = rotation if rotation is not None else _default_rotation
     _display.render(raw, rotation=r, background=background)
-    return f"Rendered {len(elements)} element(s)."
+    return f"Rendered {len(elements)} element(s) at rotation={r}."
 
 
 @mcp.tool()
