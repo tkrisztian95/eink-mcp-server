@@ -232,12 +232,11 @@ All elements are passed as a list to `draw`. Each must have a `type` field.
 
 **text**
 ```json
-{ "type": "text", "text": "Hello", "x": 10, "y": 10, "size": "label", "bold": false, "fill": 0, "align": "left", "max_width": null, "font": null }
+{ "type": "text", "text": "Hello", "x": 10, "y": 10, "size": "label", "bold": false, "fill": 0, "align": "left", "font": null }
 ```
 - `size` — pixel integer or named size: `title`(34) `large`(28) `label`(19) `value`(17) `small`(14) `tiny`(12)
 - `bold` — uses the bold variant of the default font
-- `align` — `"left"` (default), `"center"`, or `"right"`; positions text within `[x, x+max_width]`
-- `max_width` — alignment box width; defaults to full canvas width
+- `align` — `"left"` (default): x is the left edge; `"center"`: x is the center point; `"right"`: x is the right edge
 - `font` — optional path to a custom `.ttf` file
 
 **rect**

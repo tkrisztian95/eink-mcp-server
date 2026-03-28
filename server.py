@@ -31,9 +31,8 @@ class TextElement(BaseModel):
     fill: int = 0  # 0 = black, 255 = white
     font: Optional[str] = None  # path to a .ttf font file; overrides default and bold
     align: Literal["left", "center", "right"] = "left"
-    max_width: Optional[int] = None
-    """Width of the alignment box in pixels. For center/right align: text is positioned
-    within [x, x+max_width]. Defaults to full canvas width."""
+    """Anchor behaviour: "left" → x is the left edge; "center" → x is the center point;
+    "right" → x is the right edge."""
 
 
 class RectElement(BaseModel):
@@ -239,8 +238,7 @@ def draw(
                     path must be an absolute path to a PNG/JPEG/SVG/Pillow-readable file.
                     SVG files are rasterised automatically via cairosvg.
                     width/height are optional; omit both to use the file's native size.
-    text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left",
-                    max_width=null }
+    text:         { type, text, x, y, size=24, bold=false, fill=0, font=null, align="left" }
     rect:         { type, x0, y0, x1, y1, outline=0, fill=null }
     line:         { type, x0, y0, x1, y1, fill=0, width=1 }
     ellipse:      { type, x0, y0, x1, y1, outline=0, fill=null }
@@ -249,7 +247,7 @@ def draw(
 
     size accepts integers or named strings: title(34) large(28) label(19) value(17) small(14)
     tiny(12).
-    align: "left"|"center"|"right" — use max_width to set the alignment box width.
+    align: "left"=x is left edge, "center"=x is center point, "right"=x is right edge.
     progress_bar value: 0.0–1.0 fill fraction.
     fill/outline/background: 0=black, 255=white, 0–255 greyscale.
     rotation: 0 (default), 90, 180, 270.

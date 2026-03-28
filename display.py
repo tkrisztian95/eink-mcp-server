@@ -137,12 +137,11 @@ def _draw_element(draw: ImageDraw.ImageDraw, el: dict, canvas_w: int, canvas_h: 
         align = el.get("align", "left")
 
         if align in ("center", "right"):
-            max_width = el.get("max_width", canvas_w)
             tw, _ = _text_size(draw, text, font)
             if align == "center":
-                x = x + (max_width - tw) // 2
+                x = x - tw // 2
             else:
-                x = x + max_width - tw
+                x = x - tw
 
         draw.text((x, y), text, font=font, fill=el.get("fill", 0))
 
