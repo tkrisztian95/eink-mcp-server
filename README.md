@@ -90,10 +90,12 @@ claude login
 **Register the MCP server:**
 
 ```bash
-claude mcp add eink-display -e EINK_DISPLAY_MODEL=<your_model> -e EINK_ROTATION=0 /path/to/eink-mcp/venv/bin/python -- /path/to/eink-mcp/server.py
+claude mcp add eink-display -s user -e EINK_DISPLAY_MODEL=<your_model> -e EINK_ROTATION=<rotation> -- /path/to/eink-mcp/venv/bin/python /path/to/eink-mcp/server.py
 ```
 
 Adjust `EINK_DISPLAY_MODEL` and `EINK_ROTATION` to match your hardware. See the [Configuration](#configuration) section for supported values.
+
+> **Scope note:** The `-s user` flag registers the server at user scope, so it is available from any working directory. Without it, the server is registered only for the current project directory — env vars like `EINK_ROTATION` will not be picked up when running Claude from a different folder.
 
 **Verify the server is listed:**
 
