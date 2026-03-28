@@ -217,7 +217,7 @@ def clear_display() -> str:
 @mcp.tool()
 def draw(
     elements: list[DrawElement],
-    rotation: int = _default_rotation,
+    rotation: Optional[int] = None,
     background: int = 255,
 ) -> str:
     """Render drawing elements onto the eink display.
@@ -250,11 +250,12 @@ def draw(
     align: "left"=x is left edge, "center"=x is center point, "right"=x is right edge.
     progress_bar value: 0.0–1.0 fill fraction.
     fill/outline/background: 0=black, 255=white, 0–255 greyscale.
-    rotation: 0 (default), 90, 180, 270.
+    rotation: omit to use EINK_ROTATION env var; only pass to override. Values: 0, 90, 180, 270.
     background: canvas colour, default 255 (white).
     """
     raw = [el.model_dump() for el in elements]
-    _display.render(raw, rotation=rotation, background=background)
+    r = rotation if rotation is not None else _default_rotation
+    _display.render(raw, rotation=r, background=background)
     return f"Rendered {len(elements)} element(s)."
 
 
@@ -262,7 +263,7 @@ def draw(
 def render_layout(
     sections: list[LayoutSection],
     padding: int = 20,
-    rotation: int = _default_rotation,
+    rotation: Optional[int] = None,
     background: int = 255,
 ) -> str:
     """Render a structured dashboard layout onto the eink display.
@@ -292,10 +293,14 @@ def render_layout(
     bar_chart must be the last section — it fills all remaining vertical space.
     progress: 0.0–1.0 fill fraction.
     size: integer pixels or named — title(34) large(28) label(19) value(17) small(14) tiny(12).
+    rotation: omit to use EINK_ROTATION env var; only pass to override. Values: 0, 90, 180, 270.
     """
     from PIL import Image
 
     from layout import render_layout as _render_layout
+
+    if rotation is None:
+        rotation = _default_rotation
 
     if rotation in (90, 270):
         w, h = _display.height, _display.width
