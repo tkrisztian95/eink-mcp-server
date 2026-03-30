@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -13,8 +14,33 @@ log = logging.getLogger(__name__)
 
 mcp = FastMCP("eink-display")
 _display = EinkDisplay()
-_default_rotation = int(os.environ.get("EINK_ROTATION", 0))
+_default_rotation = int(os.getenv("EINK_ROTATION", 0))
 log.info("eink-display MCP server started (display available: %s)", _display._available)
+
+# ── Display state ─────────────────────────────────────────────────────────────
+
+_STATE_PATH = os.getenv("EINK_STATE_PATH", "/tmp/eink_state.json")
+
+try:
+    with open(_STATE_PATH) as _f:
+        _display_state: dict | None = json.load(_f)
+    log.info("Loaded display state from %s", _STATE_PATH)
+except Exception:
+    _display_state = None
+
+
+def _save_state(state: dict | None) -> None:
+    global _display_state
+    _display_state = state
+    try:
+        if state is None:
+            if os.path.exists(_STATE_PATH):
+                os.remove(_STATE_PATH)
+        else:
+            with open(_STATE_PATH, "w") as f:
+                json.dump(state, f)
+    except Exception as e:
+        log.warning("Could not persist display state: %s", e)
 
 
 # ── Drawing element models ────────────────────────────────────────────────────
@@ -210,7 +236,9 @@ def get_display_info() -> dict:
 @mcp.tool()
 def clear_display() -> str:
     """Clear the eink display to white."""
+    global _display_state
     _display.clear()
+    _save_state(None)
     return "Display cleared."
 
 
@@ -256,6 +284,7 @@ def draw(
     raw = [el.model_dump() for el in elements]
     r = rotation if rotation is not None else _default_rotation
     _display.render(raw, rotation=r, background=background)
+    _save_state({"tool": "draw", "elements": raw, "rotation": r, "background": background})
     return f"Rendered {len(elements)} element(s) at rotation={r}."
 
 
@@ -307,11 +336,22 @@ def render_layout(
     else:
         w, h = _display.width, _display.height
 
+    raw_sections = [s.model_dump() for s in sections]
     image = Image.new("L", (w, h), background)
-    _render_layout(image, [s.model_dump() for s in sections], padding)
+    _render_layout(image, raw_sections, padding)
 
     if rotation != 0:
         image = image.rotate(rotation, expand=True)
+
+    _save_state(
+        {
+            "tool": "render_layout",
+            "sections": raw_sections,
+            "padding": padding,
+            "rotation": rotation,
+            "background": background,
+        }
+    )
 
     if not _display._available:
         log.warning("Hardware not available — layout rendered (dry run)")
@@ -319,6 +359,22 @@ def render_layout(
 
     _display.send(image)
     return f"Layout rendered: {len(sections)} section(s)."
+
+
+@mcp.tool()
+def get_display_state() -> dict:
+    """Return the spec of what is currently shown on the eink display.
+
+    Returns the full elements (for draw) or sections (for render_layout) that
+    were last sent, along with rotation, background, and padding. Returns
+    {"empty": true} if the display has been cleared or nothing has been drawn.
+
+    Use this before iterating on a layout — fetch the current spec, modify it,
+    then call draw() or render_layout() again.
+    """
+    if _display_state is None:
+        return {"empty": True}
+    return _display_state
 
 
 if __name__ == "__main__":

@@ -66,7 +66,8 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
         "EINK_DISPLAY_MODEL": "epd7in5_V2",
         "EINK_ROTATION": "0",
         "EINK_FONT_PATH": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-        "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+        "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+        "EINK_STATE_PATH": "/tmp/eink_state.json"
       }
     }
   }
@@ -117,12 +118,17 @@ What is the eink display size?
 Draw "Hello from Claude" in large text centered on the eink display
 ```
 
+**Check what is currently shown on the display:**
+```
+What is currently on the eink display? Describe what you can see.
+```
+
 **Clear the display:**
 ```
 Clear the eink display
 ```
 
-Claude will pick up the `get_display_info`, `draw`, and `clear_display` tools automatically. On a Mac without Pi hardware, tool calls still succeed — a `WARNING Hardware not available` line appears in the server's stderr log instead of writing to the display.
+Claude will pick up the `get_display_info`, `draw`, `render_layout`, `clear_display`, and `get_display_state` tools automatically. On a Mac without Pi hardware, tool calls still succeed — a `WARNING Hardware not available` line appears in the server's stderr log instead of writing to the display.
 
 ## Configuration
 
@@ -182,6 +188,7 @@ Ready-made prompts for common drawings. Copy the prompt, fill in any placeholder
 | Tool | Description |
 |------|-------------|
 | `get_display_info` | Returns display dimensions and named font sizes |
+| `get_display_state` | Returns the last rendered spec (elements or sections) so Claude can iterate on it |
 | `clear_display` | Clears the display to white |
 | `render_layout` | Renders a structured dashboard — sections stack vertically, no coordinates needed |
 | `draw` | Renders a list of raw drawing elements — full pixel-level control |
