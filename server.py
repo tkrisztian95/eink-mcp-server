@@ -14,12 +14,12 @@ log = logging.getLogger(__name__)
 
 mcp = FastMCP("eink-display")
 _display = EinkDisplay()
-_default_rotation = int(os.environ.get("EINK_ROTATION", 0))
+_default_rotation = int(os.getenv("EINK_ROTATION", 0))
 log.info("eink-display MCP server started (display available: %s)", _display._available)
 
 # ── Display state ─────────────────────────────────────────────────────────────
 
-_STATE_PATH = os.environ.get("EINK_STATE_PATH", "/tmp/eink_state.json")
+_STATE_PATH = os.getenv("EINK_STATE_PATH", "/tmp/eink_state.json")
 
 try:
     with open(_STATE_PATH) as _f:
