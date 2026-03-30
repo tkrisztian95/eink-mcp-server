@@ -66,7 +66,8 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
         "EINK_DISPLAY_MODEL": "epd7in5_V2",
         "EINK_ROTATION": "0",
         "EINK_FONT_PATH": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-        "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+        "EINK_FONT_PATH_BOLD": "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+        "EINK_STATE_PATH": "/tmp/eink_state.json"
       }
     }
   }
