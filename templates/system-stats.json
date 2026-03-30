@@ -1,0 +1,69 @@
+{
+  "name": "system-stats",
+  "description": "System resource monitor showing CPU, RAM, disk usage as labeled progress bars with numeric values.",
+  "tags": ["system", "cpu", "memory", "ram", "disk", "stats", "monitor", "server"],
+  "tool": "render_layout",
+  "spec": {
+    "padding": 20,
+    "sections": [
+      {
+        "type": "header",
+        "title": "hostname",
+        "subtitle": "HH:MM"
+      },
+      {
+        "type": "divider",
+        "bold": true
+      },
+      {
+        "type": "stat_block",
+        "label": "CPU",
+        "value": "NN%",
+        "progress": 0.0,
+        "detail": "N cores  •  NN°C"
+      },
+      {
+        "type": "spacer",
+        "height": 6
+      },
+      {
+        "type": "stat_block",
+        "label": "Memory",
+        "value": "N.N / NN GB",
+        "progress": 0.0,
+        "detail": "NN% used"
+      },
+      {
+        "type": "spacer",
+        "height": 6
+      },
+      {
+        "type": "stat_block",
+        "label": "Disk",
+        "value": "NNN / NNN GB",
+        "progress": 0.0,
+        "detail": "NN% used"
+      },
+      {
+        "type": "spacer",
+        "height": 6
+      },
+      {
+        "type": "stat_block",
+        "label": "Network",
+        "value": null,
+        "detail": "↑ NN KB/s  ↓ NN KB/s"
+      },
+      {
+        "type": "divider",
+        "light": true
+      },
+      {
+        "type": "text_row",
+        "left": "Uptime: N days HH:MM",
+        "right": "Load: N.NN N.NN N.NN",
+        "size": "small"
+      }
+    ]
+  }
+}

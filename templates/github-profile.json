@@ -1,0 +1,59 @@
+{
+  "name": "github-profile",
+  "description": "GitHub user profile card showing the GitHub logo, username, follower/following counts, top language, and a 7-day commit activity bar chart.",
+  "tags": ["github", "profile", "git", "developer", "code", "commits", "activity"],
+  "tool": "render_layout",
+  "spec": {
+    "padding": 20,
+    "sections": [
+      {
+        "type": "image_block",
+        "path": "assets/github-mark.svg",
+        "width": 48
+      },
+      {
+        "type": "header",
+        "title": "@username",
+        "subtitle": "github.com"
+      },
+      {
+        "type": "divider",
+        "bold": true
+      },
+      {
+        "type": "text_row",
+        "left": "Full Name",
+        "right": "⭐ NNN stars",
+        "size": "label",
+        "bold": true
+      },
+      {
+        "type": "text_row",
+        "left": "Followers: NNN",
+        "right": "Following: NNN"
+      },
+      {
+        "type": "text_row",
+        "left": "Repos: NNN",
+        "right": "Top lang: Language"
+      },
+      {
+        "type": "divider",
+        "light": true
+      },
+      {
+        "type": "bar_chart",
+        "title": "Commits last 7 days",
+        "data": [
+          { "label": "Mon", "value": 0 },
+          { "label": "Tue", "value": 0 },
+          { "label": "Wed", "value": 0 },
+          { "label": "Thu", "value": 0 },
+          { "label": "Fri", "value": 0 },
+          { "label": "Sat", "value": 0 },
+          { "label": "Sun", "value": 0 }
+        ]
+      }
+    ]
+  }
+}

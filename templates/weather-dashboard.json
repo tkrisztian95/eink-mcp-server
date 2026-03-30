@@ -1,0 +1,56 @@
+{
+  "name": "weather-dashboard",
+  "description": "Weather dashboard with current temperature, conditions, humidity, wind, and a 5-day forecast bar chart.",
+  "tags": ["weather", "forecast", "temperature", "dashboard", "outdoor"],
+  "tool": "render_layout",
+  "spec": {
+    "padding": 20,
+    "sections": [
+      {
+        "type": "header",
+        "title": "City Name",
+        "subtitle": "Updated HH:MM"
+      },
+      {
+        "type": "divider",
+        "bold": true
+      },
+      {
+        "type": "text_row",
+        "left": "NN°C  Conditions",
+        "right": "Feels like NN°C",
+        "size": "large",
+        "bold": true
+      },
+      {
+        "type": "spacer",
+        "height": 6
+      },
+      {
+        "type": "text_row",
+        "left": "Humidity: NN%",
+        "right": "Wind: NN km/h"
+      },
+      {
+        "type": "text_row",
+        "left": "Pressure: NNN hPa",
+        "right": "UV index: N"
+      },
+      {
+        "type": "divider",
+        "light": true
+      },
+      {
+        "type": "bar_chart",
+        "title": "5-day forecast (°C)",
+        "data": [
+          { "label": "Mon", "value": 0 },
+          { "label": "Tue", "value": 0 },
+          { "label": "Wed", "value": 0 },
+          { "label": "Thu", "value": 0 },
+          { "label": "Fri", "value": 0 }
+        ]
+      }
+    ]
+  }
+}
