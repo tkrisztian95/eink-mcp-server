@@ -180,15 +180,15 @@ sudo reboot
 
 Ready-made prompts for common drawings. Copy the prompt, fill in any placeholders, and paste it into Claude.
 
+| Prompt | Description | Preview |
+|--------|-------------|---------|
+| [GitHub Profile](prompts/github-profile-eink.md) | Renders a GitHub user's profile card with stats and 7-day activity chart | ![GitHub profile card on e-ink display](assets/prompt-github-profile.jpg) |
+
 ### Templates
 
 Templates are JSON files in the `templates/` directory that define reusable layouts for the e-ink display. **Each template can contain multiple layouts**, allowing you to switch between different dashboard or display styles within a single template file. This is useful for dashboards that have several views, or for grouping related layouts together.
 
 To use a template, reference its name and (optionally) the layout you want to render. See the `templates/` folder for examples.
-
-| Prompt | Description | Preview |
-|--------|-------------|---------|
-| [GitHub Profile](prompts/github-profile-eink.md) | Renders a GitHub user's profile card with stats and 7-day activity chart | ![GitHub profile card on e-ink display](assets/prompt-github-profile.jpg) |
 
 ## Tools
 
