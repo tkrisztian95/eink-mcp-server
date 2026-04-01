@@ -199,6 +199,7 @@ To use a template, reference its name and (optionally) the layout you want to re
 | `clear_display` | Clears the display to white |
 | `render_layout` | Renders a structured dashboard — sections stack vertically, no coordinates needed |
 | `draw` | Renders a list of raw drawing elements — full pixel-level control |
+| `list_templates` | Returns all available display templates as a JSON array, including usage info and specs |
 
 ### render_layout — sections
 
