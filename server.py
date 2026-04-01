@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import Annotated, Literal, Optional, Union
 
 from mcp.server.fastmcp import FastMCP
@@ -359,6 +360,64 @@ def render_layout(
 
     _display.send(image)
     return f"Layout rendered: {len(sections)} section(s)."
+
+
+_TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+
+def _resolve_asset_paths(obj: object) -> object:
+    """Recursively resolve relative 'path' values in a template spec to absolute paths.
+
+    Template authors write paths relative to the templates/ directory
+    (e.g. "assets/github-mark.svg"). This expands them so draw() and
+    render_layout() receive absolute paths as required.
+    """
+    if isinstance(obj, dict):
+        return {
+            k: (
+                str((_TEMPLATES_DIR / v).resolve())
+                if k == "path" and isinstance(v, str) and not Path(v).is_absolute()
+                else _resolve_asset_paths(v)
+            )
+            for k, v in obj.items()
+        }
+    if isinstance(obj, list):
+        return [_resolve_asset_paths(item) for item in obj]
+    return obj
+
+
+@mcp.tool()
+def list_templates() -> str:
+    """Return all available display templates as a JSON array.
+
+    Call this when the user asks to display something that might match a known
+    layout (e.g. "show me the weather", "display a clock", "show system stats").
+
+    Each template includes:
+    - name: unique identifier
+    - description: what it shows and when to use it
+    - tags: keywords for matching user intent
+    - tool: which tool to call — "draw" or "render_layout"
+    - spec: the full parameter object to pass to that tool (with placeholder
+            values like "NN°C" or 0.0 that you should replace with real data).
+            Asset paths (images, icons) are already resolved to absolute paths.
+
+    Workflow:
+    1. Call list_templates() to discover options.
+    2. Pick the template whose description/tags best match the user's intent.
+    3. Fetch any real data needed to fill in the placeholders.
+    4. Call draw() or render_layout() with the spec, substituting real values.
+       You may add, remove, or reorder sections/elements to better fit the content.
+    """
+    templates = []
+    for path in sorted(_TEMPLATES_DIR.glob("*.json")):
+        try:
+            template = json.loads(path.read_text())
+            template["spec"] = _resolve_asset_paths(template.get("spec", {}))
+            templates.append(template)
+        except Exception as e:
+            log.warning("Could not load template %s: %s", path.name, e)
+    return json.dumps(templates)
 
 
 @mcp.tool()

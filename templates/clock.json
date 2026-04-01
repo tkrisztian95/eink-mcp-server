@@ -1,0 +1,29 @@
+{
+  "name": "clock",
+  "description": "Large digital clock showing current time and date. Centered on display.",
+  "tags": ["clock", "time", "date", "minimal"],
+  "tool": "draw",
+  "spec": {
+    "elements": [
+      {
+        "type": "text",
+        "text": "HH:MM",
+        "x": 400,
+        "y": 180,
+        "size": 96,
+        "bold": true,
+        "align": "center",
+        "fill": 0
+      },
+      {
+        "type": "text",
+        "text": "Weekday, Month DD YYYY",
+        "x": 400,
+        "y": 310,
+        "size": "large",
+        "align": "center",
+        "fill": 0
+      }
+    ]
+  }
+}

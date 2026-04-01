@@ -1,0 +1,36 @@
+{
+  "name": "simple-message",
+  "description": "Centered title and body text. Use for announcements, reminders, quotes, or any short message that should be clearly readable from a distance.",
+  "tags": ["message", "text", "announcement", "reminder", "quote", "note", "simple"],
+  "tool": "draw",
+  "spec": {
+    "elements": [
+      {
+        "type": "text",
+        "text": "Title",
+        "x": 400,
+        "y": 160,
+        "size": "title",
+        "bold": true,
+        "align": "center",
+        "fill": 0
+      },
+      {
+        "type": "divider",
+        "y": 220,
+        "fill": 0,
+        "width": 1,
+        "margin": 80
+      },
+      {
+        "type": "text",
+        "text": "Body text goes here.",
+        "x": 400,
+        "y": 260,
+        "size": "large",
+        "align": "center",
+        "fill": 0
+      }
+    ]
+  }
+}
