@@ -138,6 +138,17 @@ Claude will pick up the `get_display_info`, `draw`, `render_layout`, `clear_disp
 | `EINK_ROTATION` | `0` | Default rotation applied to every `draw` and `render_layout` call. Accepted values: `0`, `90`, `180`, `270`. Useful when the display is mounted sideways or upside-down. |
 | `EINK_FONT_PATH` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf` | Default font for text elements |
 | `EINK_FONT_PATH_BOLD` | `/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf` | Bold font for text elements |
+| `EINK_OUTPUT` | `spi` | Where frames go: `spi` = Waveshare panel on this host's GPIO, `file` = publish to `EINK_FRAME_DIR` for a remote client, `both` = do both. In `file` mode the Waveshare driver is never loaded, so the GPIO stays free. |
+| `EINK_FRAME_DIR` | `/home/ktoth/eink-frame` | Directory that receives `frame.bin` and `frame.png` when `EINK_OUTPUT` is `file` or `both`. Created if missing. |
+
+### Remote display (frame output)
+
+With `EINK_OUTPUT=file` the server doesn't drive any hardware. Every `draw`, `render_layout` and `clear_display` call publishes the finished frame instead, so a network client (e.g. an ESP32 wired to the panel) can fetch it over HTTP:
+
+- `frame.bin`: raw 1-bit frame, exactly `width × height / 8` bytes (48 000 for 800×480). Row-major, top-left first, MSB = leftmost pixel, `1` = white, `0` = black (identical to PIL `image.convert("1").tobytes()`). Rotation (`EINK_ROTATION`) is already applied.
+- `frame.png`: the same frame as a PNG, for previews and debugging.
+
+Both files are written to a `.tmp` file and then renamed, so readers never see a half-written frame. `frame.bin` is replaced last. Serve the directory with any static file server that supports `ETag`/`If-None-Match`, and clients can poll cheaply (a `304` means nothing changed).
 
 ## Development
 
@@ -153,6 +164,12 @@ venv/bin/pip install -r requirements-dev.txt
 ruff check .
 ruff check --fix .
 ruff format .
+```
+
+**Tests:**
+
+```bash
+venv/bin/python -m pytest tests
 ```
 
 If the Waveshare hardware is unavailable (e.g. on a Mac), `draw` and `clear_display` log a dry-run message instead of crashing, so you can develop and test tool schemas without a Pi.

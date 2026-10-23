@@ -3,3 +3,4 @@ venv/
 e-Paper/
 __pycache__/
 *.pyc
+.pytest_cache/

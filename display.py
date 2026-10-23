@@ -35,6 +35,16 @@ if _dims is None:
     _dims = (800, 480)
 DISPLAY_WIDTH, DISPLAY_HEIGHT = _dims
 
+# Where finished frames go: "spi" = Waveshare panel on this host's GPIO,
+# "file" = publish frame.bin/frame.png to EINK_FRAME_DIR (pulled by a remote
+# client such as an ESP32), "both" = do both.
+OUTPUT_MODES = ("spi", "file", "both")
+OUTPUT = os.getenv("EINK_OUTPUT", "spi").lower()
+if OUTPUT not in OUTPUT_MODES:
+    log.warning("Unknown EINK_OUTPUT %r — falling back to 'spi'", OUTPUT)
+    OUTPUT = "spi"
+FRAME_DIR = os.getenv("EINK_FRAME_DIR", "/home/ktoth/eink-frame")
+
 # Named font sizes — match the eink-claude-usage conventions
 NAMED_SIZES: dict[str, int] = {
     "title": 34,
@@ -47,13 +57,18 @@ NAMED_SIZES: dict[str, int] = {
 
 
 class EinkDisplay:
-    def __init__(self):
-        try:
-            self._epd_module = importlib.import_module(f"waveshare_epd.{DISPLAY_MODEL}")
-            self._available = True
-        except Exception:
-            self._epd_module = None
-            self._available = False
+    def __init__(self, output: Optional[str] = None, frame_dir: Optional[str] = None):
+        self.output = output or OUTPUT
+        self.frame_dir = frame_dir or FRAME_DIR
+        self._epd_module = None
+        self._available = False
+        # Only touch the GPIO/SPI driver when the panel is actually wired to this host.
+        if self.output in ("spi", "both"):
+            try:
+                self._epd_module = importlib.import_module(f"waveshare_epd.{DISPLAY_MODEL}")
+                self._available = True
+            except Exception:
+                pass
 
     @property
     def width(self) -> int:
@@ -63,9 +78,21 @@ class EinkDisplay:
     def height(self) -> int:
         return DISPLAY_HEIGHT
 
+    @property
+    def writes_frames(self) -> bool:
+        return self.output in ("file", "both")
+
+    @property
+    def is_available(self) -> bool:
+        """True if send() reaches at least one output (SPI hardware or frame file)."""
+        return self._available or self.writes_frames
+
     def clear(self) -> None:
+        if self.writes_frames:
+            self._write_frame(Image.new("1", (self.width, self.height), 255))
         if not self._available:
-            log.warning("Hardware not available — skipping clear")
+            if self.output != "file":
+                log.warning("Hardware not available — skipping clear")
             return
         epd = self._epd_module.EPD()
         epd.init()
@@ -73,14 +100,44 @@ class EinkDisplay:
         epd.sleep()
 
     def send(self, image: Image.Image) -> None:
-        """Send a fully prepared PIL image to the hardware."""
+        """Send a fully prepared PIL image to every configured output."""
+        mono = image.convert("1")
+        if self.writes_frames:
+            self._write_frame(mono)
         if not self._available:
-            log.warning("Hardware not available — skipping send")
+            if self.output != "file":
+                log.warning("Hardware not available — skipping send")
             return
         epd = self._epd_module.EPD()
         epd.init()
-        epd.display(epd.getbuffer(image.convert("1")))
+        epd.display(epd.getbuffer(mono))
         epd.sleep()
+
+    def _write_frame(self, mono: Image.Image) -> None:
+        """Atomically publish frame.png and frame.bin (raw 1-bit, 1 = white, MSB first).
+
+        frame.bin is replaced last: remote clients poll it, so by the time it
+        changes the matching PNG preview is already in place.
+        """
+        if mono.size != (self.width, self.height):
+            log.warning(
+                "Frame is %dx%d, expected %dx%d — skipping file output",
+                *mono.size,
+                self.width,
+                self.height,
+            )
+            return
+        os.makedirs(self.frame_dir, exist_ok=True)
+
+        png = os.path.join(self.frame_dir, "frame.png")
+        mono.save(png + ".tmp", format="PNG")
+        os.replace(png + ".tmp", png)
+
+        bin_path = os.path.join(self.frame_dir, "frame.bin")
+        with open(bin_path + ".tmp", "wb") as f:
+            f.write(mono.tobytes())
+        os.replace(bin_path + ".tmp", bin_path)
+        log.info("Frame published to %s", self.frame_dir)
 
     def render(self, elements: list[dict], rotation: int = 0, background: int = 255) -> None:
         if rotation in (90, 270):
@@ -97,7 +154,7 @@ class EinkDisplay:
         if rotation != 0:
             image = image.rotate(rotation, expand=True)
 
-        if not self._available:
+        if not self.is_available:
             log.warning("Hardware not available — rendered %d elements (dry run)", len(elements))
             return
         self.send(image)
