@@ -16,7 +16,11 @@ log = logging.getLogger(__name__)
 mcp = FastMCP("eink-display")
 _display = EinkDisplay()
 _default_rotation = int(os.getenv("EINK_ROTATION", 0))
-log.info("eink-display MCP server started (display available: %s)", _display._available)
+log.info(
+    "eink-display MCP server started (output: %s, display available: %s)",
+    _display.output,
+    _display.is_available,
+)
 
 # ── Display state ─────────────────────────────────────────────────────────────
 
@@ -354,7 +358,7 @@ def render_layout(
         }
     )
 
-    if not _display._available:
+    if not _display.is_available:
         log.warning("Hardware not available — layout rendered (dry run)")
         return f"Layout rendered (dry run): {len(sections)} section(s)."
 
